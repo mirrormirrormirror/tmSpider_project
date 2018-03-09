@@ -12,8 +12,9 @@ import pandas
 logger = logging.getLogger("searchSpider")
 
 def updateKeyWordToRedis():
+    path = os.path.dirname(os.path.realpath(__file__))+"/keyWord.xlsx"
     r = redis.Redis(host=REDIS_HOST, port=REDIS_PRORT, db=REDIS_DB)
-    keyWordCsv = pandas.read_excel("C:\\Users\\20170912A2\\PycharmProjects\\c2c-spider\\c2c-spiderProject\\tmSpiderProject\\tmSpiderProject\\keyWord.xlsx")
+    keyWordCsv = pandas.read_excel(path)
     keyWordList = keyWordCsv["关键词"]
     keyWords = keyWordList.values
     for keyWord in keyWords:
