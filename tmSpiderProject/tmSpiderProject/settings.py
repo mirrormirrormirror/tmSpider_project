@@ -4,8 +4,8 @@
 COMMENT_PRODUCE_ID = "commentProductId"
 DETAIL_PRODUCE_ID = "detailProductId"
 COMMENT_FEED = "commentFeed"
-REDIS_HOST = 'localhost'
-REDIS_PRORT = 6379
+REDIS_HOST = '191k34m630.51mypc.cn'
+REDIS_PRORT = 18650
 REDIS_DB = 1
 NEW_KEYWORD = "newKeyWord"
 OLD_KEYWORD = "oldKeyWord"
