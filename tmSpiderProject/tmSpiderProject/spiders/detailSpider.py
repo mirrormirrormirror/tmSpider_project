@@ -14,7 +14,7 @@ import time
 logger = logging.getLogger("detailSpider")
 
 
-@retry(delay=2)
+@retry(delay=1, tries=1)
 def getHtml(url, referen='', protocol='http', openProxies=True):
     if not url.startswith(protocol):
         url = protocol + '://' + url
