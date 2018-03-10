@@ -48,7 +48,7 @@ class detailSpider(scrapy.spiders.Spider):
             detailProductIdLen = self.r.scard(DETAIL_PRODUCE_ID)
             if int(detailProductIdLen) > 0:
                 detailProductId = self.r.spop(DETAIL_PRODUCE_ID)
-                skuId = self.r.spop(COMMENT_FEED)
+                skuId = self.r.hget(COMMENT_FEED,detailProductId.decode())
                 pages = []
                 url = "https://detail.tmall.com/item.htm?id=" + detailProductId.decode() + "&skuId=" + skuId.decode()
                 meta = {"detailProductId": detailProductId.decode()}
@@ -64,7 +64,7 @@ class detailSpider(scrapy.spiders.Spider):
             detailProductIdLen = self.r.scard(DETAIL_PRODUCE_ID)
             if int(detailProductIdLen) > 0:
                 detailProductId = self.r.spop(DETAIL_PRODUCE_ID)
-                skuId = self.r.spop(COMMENT_FEED)
+                skuId = self.r.hget(COMMENT_FEED,detailProductId.decode())
                 if detailProductId is not None:
                     url = "https://detail.tmall.com/item.htm?id=" + detailProductId.decode() + "&skuId=" + skuId.decode()
                     meta = {"detailProductId": detailProductId.decode()}
