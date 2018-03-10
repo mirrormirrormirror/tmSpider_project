@@ -35,6 +35,7 @@ class KeyWordItem(scrapy.Item):
 
 class DetailItem(scrapy.Item):
     # define the fields for your item here like:
+    trueAddressQuantity = scrapy.Field()
     itemId = scrapy.Field()
     title = scrapy.Field()
     collectNum = scrapy.Field()
