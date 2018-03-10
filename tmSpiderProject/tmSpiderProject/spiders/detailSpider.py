@@ -14,7 +14,7 @@ import time
 logger = logging.getLogger("detailSpider")
 
 
-@retry(delay=1, tries=1)
+@retry( tries=1, delay=2)
 def getHtml(url, referen='', protocol='http', openProxies=True):
     if not url.startswith(protocol):
         url = protocol + '://' + url
@@ -32,7 +32,7 @@ def getHtml(url, referen='', protocol='http', openProxies=True):
     else:
         page = requests.get(url, headers=headers, timeout=5, cookies={})
     if page.status_code != 200 or "window.location.href" in page.text:
-        raise ("get page fail")
+        raise (BaseException("get page err"))
     return page.text
 
 
