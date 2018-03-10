@@ -3,12 +3,8 @@ import scrapy
 import logging
 import re
 import json
-
-from multiprocessing import Process
 from bs4 import BeautifulSoup
 from retry import retry
-
-from ..startMeth import *
 from ..items import DetailItem
 import requests
 import urllib.request as ur
@@ -19,19 +15,23 @@ logger = logging.getLogger("detailSpider")
 
 
 @retry(delay=2)
-def getHtml(url, referen='', protocol='http'):
-    # 获取代理ip
-    ip = ur.urlopen('http://api.ip.data5u.com/dynamic/get.html?order=0d171ac67a30b8ef3791b18d806f7c7f&sep=4').read()[
-         :-1]
-    proxies = {'https': 'https://' + ip.decode()}
+def getHtml(url, referen='', protocol='http', openProxies=True):
     if not url.startswith(protocol):
         url = protocol + '://' + url
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6',
         'Referer': referen,
     }
-    page = requests.get(url, headers=headers, timeout=5, proxies=proxies, cookies={})
-    if page.status_code != 200:
+    if openProxies:
+        # 获取代理ip
+        ip = ur.urlopen(
+            'http://api.ip.data5u.com/dynamic/get.html?order=0d171ac67a30b8ef3791b18d806f7c7f&sep=4').read()[
+             :-1]
+        proxies = {'https': 'https://' + ip.decode()}
+        page = requests.get(url, headers=headers, timeout=5, proxies=proxies, cookies={})
+    else:
+        page = requests.get(url, headers=headers, timeout=5, cookies={})
+    if page.status_code != 200 or "window.location.href" in page.text:
         raise ("get page fail")
     return page.text
 
@@ -117,7 +117,7 @@ class detailSpider(scrapy.spiders.Spider):
             destailsDict.append(detailTmp)
         pageStr = getHtml(
             'https://count.taobao.com/counter3?_ksTS=1501297231590_239&callback=jsonp25&keys=ICCP_1_' + response.meta[
-                "detailProductId"])
+                "detailProductId"], openProxies=False)
         pageJsonStr = re.findall(r'\((.*?)\);', pageStr)[0]
         # logger.info("pageJson:" + pageJsonStr)
         collectNum = json.loads(pageJsonStr)['ICCP_1_' + response.meta["detailProductId"]]
@@ -128,14 +128,31 @@ class detailSpider(scrapy.spiders.Spider):
         data = getHtml(url,
                        referen="http://detail.tmall.com/item.htm?id=%s" % response.meta["detailProductId"])
         '''库存'''
-        page_json = json.loads(data)
-        totalQuantity = 0
-        deliveryAddress = ""
-        if page_json['defaultModel']['inventoryDO']['totalQuantity'] is not None:
-            totalQuantity = page_json['defaultModel']['inventoryDO']['totalQuantity']
-        if page_json['defaultModel']['deliveryDO']['deliveryAddress'] is not None:
-            deliveryAddress = page_json['defaultModel']['deliveryDO']['deliveryAddress']
+        trueAddressQuantity = 1
+        try:
+            page_json = json.loads(data)
+            totalQuantity = 0
+            deliveryAddress = ""
+            if page_json['defaultModel']['inventoryDO']['totalQuantity'] is not None:
+                totalQuantity = page_json['defaultModel']['inventoryDO']['totalQuantity']
+            if page_json['defaultModel']['deliveryDO']['deliveryAddress'] is not None:
+                deliveryAddress = page_json['defaultModel']['deliveryDO']['deliveryAddress']
+        except:
+            # 从redis中拿一个随机的出来
+            randCity = self.r.srandmember("city")
+            deliveryAddress = randCity.decode()
+            rand1 = self.r.srandmember("randTotalQuantity")
+            rand2 = self.r.srandmember("randTotalQuantity")
+            trueAddressQuantity = 0
+            import random
+            # 在两个随机的中间抽一个出来
+            if int(rand1.decode()) > int(rand2.decode()):
+                totalQuantity = random.randint(int(rand2.decode(), int(rand1.decode())))
+            else:
+                totalQuantity = random.randint(int(rand1.decode(), int(rand2.decode())))
+
         item["deliveryAddress"] = deliveryAddress
+        item["trueAddressQuantity"] = trueAddressQuantity
         item["totalQuantity"] = totalQuantity
         item["title"] = title
         item["itemId"] = response.meta["detailProductId"]
