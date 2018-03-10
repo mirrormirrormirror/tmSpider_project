@@ -137,10 +137,12 @@ class detailSpider(scrapy.spiders.Spider):
         import random
         # 在两个随机的中间抽一个出来
         if int(rand1.decode()) > int(rand2.decode()):
-            totalQuantity = random.randint(int(rand2.decode(), int(rand1.decode())))
+            logging.info("rand1:"+rand1.decode())
+            logging.info("rand2:" + rand2.decode())
+            totalQuantity = random.randint(134, 2643)
         else:
-            totalQuantity = random.randint(int(rand1.decode(), int(rand2.decode())))
-
+            totalQuantity = random.randint(134, 2643)
+        item["trueAddressQuantity"] = 0
         item["deliveryAddress"] = deliveryAddress
         item["trueAddressQuantity"] = trueAddressQuantity
         item["totalQuantity"] = totalQuantity
