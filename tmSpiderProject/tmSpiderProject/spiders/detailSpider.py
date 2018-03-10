@@ -48,8 +48,9 @@ class detailSpider(scrapy.spiders.Spider):
             detailProductIdLen = self.r.scard(DETAIL_PRODUCE_ID)
             if int(detailProductIdLen) > 0:
                 detailProductId = self.r.spop(DETAIL_PRODUCE_ID)
+                skuId = self.r.spop(COMMENT_FEED)
                 pages = []
-                url = "https://detail.tmall.com/item.htm?id=" + detailProductId.decode()
+                url = "https://detail.tmall.com/item.htm?id=" + detailProductId.decode() + "&skuId=" + skuId.decode()
                 meta = {"detailProductId": detailProductId.decode()}
                 page = scrapy.Request(url, meta=meta)
                 pages.append(page)
@@ -63,8 +64,9 @@ class detailSpider(scrapy.spiders.Spider):
             detailProductIdLen = self.r.scard(DETAIL_PRODUCE_ID)
             if int(detailProductIdLen) > 0:
                 detailProductId = self.r.spop(DETAIL_PRODUCE_ID)
+                skuId = self.r.spop(COMMENT_FEED)
                 if detailProductId is not None:
-                    url = "https://detail.tmall.com/item.htm?id=" + detailProductId.decode()
+                    url = "https://detail.tmall.com/item.htm?id=" + detailProductId.decode() + "&skuId=" + skuId.decode()
                     meta = {"detailProductId": detailProductId.decode()}
                     request = scrapy.Request(url, meta=meta)
                     yield request
