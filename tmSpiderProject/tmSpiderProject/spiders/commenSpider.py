@@ -57,21 +57,28 @@ class tmSpider(scrapy.spiders.Spider):
         sellerId = response.meta["sellerId"]
         text = response.text.replace("json(", "")
         text = text[0:-1]
-        textJson = json.loads(text)
-        rateList = textJson["rateDetail"]["rateList"]
-        for rate in rateList:
-            commentTimeStamp = rate["gmtCreateTime"]
-            commentId = rate["id"]
-            commentContent = rate["rateContent"]
-            if rate["appendComment"] != "":
-                commentContent = rate["appendComment"]["content"]
-
-            commentUser = rate["displayUserNick"]
+        try:
+            textJson = json.loads(text)
+            rateList = textJson["rateDetail"]["rateList"]
+            for rate in rateList:
+                commentTimeStamp = rate["gmtCreateTime"]
+                commentId = rate["id"]
+                commentContent = rate["rateContent"]
+                if rate["appendComment"] != "":
+                    commentContent = rate["appendComment"]["content"]
+                commentUser = rate["displayUserNick"]
+                item["itemId"] = produceId
+                item["commentTimeStamp"] = commentTimeStamp
+                item["commentId"] = commentId
+                item["commentContent"] = commentContent
+                item["commentUser"] = commentUser
+                yield item
+        except:
             item["itemId"] = produceId
-            item["commentTimeStamp"] = commentTimeStamp
-            item["commentId"] = commentId
-            item["commentContent"] = commentContent
-            item["commentUser"] = commentUser
+            item["commentTimeStamp"] = ""
+            item["commentId"] = ""
+            item["commentContent"] = ""
+            item["commentUser"] = ""
             yield item
 
         currenPage = re.findall(r'currentPage=\d+', response.url)[0].split("=")[1]
@@ -88,4 +95,3 @@ class tmSpider(scrapy.spiders.Spider):
                     logging.info("commentURl:" + url)
                     nextMeta = {"itemId": itemId, "sellerId": sellerId}
                     yield Request(url=url, callback=self.parse, meta=nextMeta)
-
