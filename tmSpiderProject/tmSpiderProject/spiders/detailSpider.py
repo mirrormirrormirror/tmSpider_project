@@ -125,31 +125,21 @@ class detailSpider(scrapy.spiders.Spider):
         item["collectNum"] = collectNum
         url = "http://mdskip.taobao.com/core/initItemDetail.htm?tmallBuySupport=true&itemId=%s&service3C=true" % \
               response.meta["detailProductId"]
-        data = getHtml(url,
-                       referen="http://detail.tmall.com/item.htm?id=%s" % response.meta["detailProductId"])
-        '''库存'''
-        trueAddressQuantity = 1
-        try:
-            page_json = json.loads(data)
-            totalQuantity = 0
-            deliveryAddress = ""
-            if page_json['defaultModel']['inventoryDO']['totalQuantity'] is not None:
-                totalQuantity = page_json['defaultModel']['inventoryDO']['totalQuantity']
-            if page_json['defaultModel']['deliveryDO']['deliveryAddress'] is not None:
-                deliveryAddress = page_json['defaultModel']['deliveryDO']['deliveryAddress']
-        except:
-            # 从redis中拿一个随机的出来
-            randCity = self.r.srandmember("city")
-            deliveryAddress = randCity.decode()
-            rand1 = self.r.srandmember("randTotalQuantity")
-            rand2 = self.r.srandmember("randTotalQuantity")
-            trueAddressQuantity = 0
-            import random
-            # 在两个随机的中间抽一个出来
-            if int(rand1.decode()) > int(rand2.decode()):
-                totalQuantity = random.randint(int(rand1.decode(), int(rand2.decode())))
-            else:
-                totalQuantity = random.randint(int(rand2.decode(), int(rand1.decode())))
+        # data = getHtml(url,
+        #                referen="http://detail.tmall.com/item.htm?id=%s" % response.meta["detailProductId"])
+        # '''库存'''
+        # 从redis中拿一个随机的出来
+        randCity = self.r.srandmember("city")
+        deliveryAddress = randCity.decode()
+        rand1 = self.r.srandmember("randTotalQuantity")
+        rand2 = self.r.srandmember("randTotalQuantity")
+        trueAddressQuantity = 0
+        import random
+        # 在两个随机的中间抽一个出来
+        if int(rand1.decode()) > int(rand2.decode()):
+            totalQuantity = random.randint(int(rand2.decode(), int(rand1.decode())))
+        else:
+            totalQuantity = random.randint(int(rand1.decode(), int(rand2.decode())))
 
         item["deliveryAddress"] = deliveryAddress
         item["trueAddressQuantity"] = trueAddressQuantity
