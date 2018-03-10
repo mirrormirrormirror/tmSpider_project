@@ -34,6 +34,7 @@ class tmPipeline(object):
             collection.insert(mongoData)
         if isinstance(item, DetailItem):
             collection = self.db[MONGODB_DETAIL]
+            mongoData["trueAddressQuantity"] = item["trueAddressQuantity"]
             mongoData["collectNum"] = item["collectNum"]
             mongoData["destailsDict"] = item["destailsDict"]
             mongoData["totalQuantity"] = item["totalQuantity"]
