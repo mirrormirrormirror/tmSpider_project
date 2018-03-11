@@ -94,8 +94,10 @@ class tmSpider(scrapy.spiders.Spider):
             monthSales = productStatus[0].select("span em")[0].get_text()
             # 当前评论数
             logging.info("commentsNum:" + str(productStatus[0]))
-            commentsNum = re.findall('J_TabBar" target="_blank">(.*?)</a>', str(product))[0]
-            # commentsNum = productStatus[0].select(".productStatus > span:nth-child(2) > a")[0].get_text()
+            commentsNum = "0"
+            commentsNumMatch = re.findall('J_TabBar" target="_blank">(.*?)</a>', str(product))
+            if len(commentsNumMatch) > 0:
+                commentsNum = commentsNumMatch[0]
             dataAtp = product.select(".ww-small")[0].attrs["data-atp"]
             # 爬评论的时候有用
             sellerId = dataAtp.split(",")[-1]
